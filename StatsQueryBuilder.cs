@@ -12,16 +12,16 @@ public static class StatsQueryBuilder
     {
         var where = new List<string>();
         if (!o.IncludeGroupsAndServerTotal)
-            where.Add("Typ = 'VirtAccount'");
+            where.Add("Type = 'VirtAccount'");
         if (!string.IsNullOrWhiteSpace(o.AccountFilter))
-            where.Add($"Konto LIKE '{QueryBuilder.ToSqlLikePattern(o.AccountFilter)}'");
+            where.Add($"Account LIKE '{QueryBuilder.ToSqlLikePattern(o.AccountFilter)}'");
 
         string from = $"'{QueryBuilder.EscapeLiteral(o.StatsFolder)}\\*.xml'";
         string whereClause = where.Count > 0 ? $" WHERE {string.Join(" AND ", where)}" : "";
 
-        return "SELECT DISTINCT /stats/@type AS Typ, /stats/@account AS Konto, " +
-               "/stats/info/@lastLogin AS SenasteInloggning, /stats/total/data/@loginCount AS AntalInloggningar, " +
-               "/stats/total/data/@bytesReceived AS BytesMottagna, /stats/total/data/@bytesSent AS BytesSkickade " +
-               $"FROM {from}{whereClause} ORDER BY SenasteInloggning DESC";
+        return "SELECT DISTINCT /stats/@type AS Type, /stats/@account AS Account, " +
+               "/stats/info/@lastLogin AS LastLogin, /stats/total/data/@loginCount AS LoginCount, " +
+               "/stats/total/data/@bytesReceived AS BytesReceived, /stats/total/data/@bytesSent AS BytesSent " +
+               $"FROM {from}{whereClause} ORDER BY LastLogin DESC";
     }
 }

@@ -14,11 +14,11 @@ public static class LogFormatDetector
     public static DetectionResult Detect(string logFolder)
     {
         if (!Directory.Exists(logFolder))
-            return new DetectionResult(false, "Loggmappen finns inte — använder nya remoteAddr-formatet som standard.");
+            return new DetectionResult(false, "The log folder does not exist — defaulting to the new remoteAddr format.");
 
         var files = Directory.GetFiles(logFolder, "*.log");
         if (files.Length == 0)
-            return new DetectionResult(false, "Inga .log-filer hittades i mappen — använder nya remoteAddr-formatet som standard.");
+            return new DetectionResult(false, "No .log files were found in the folder — defaulting to the new remoteAddr format.");
 
         foreach (var file in files)
         {
@@ -38,9 +38,9 @@ public static class LogFormatDetector
                     int major = int.Parse(match.Groups[1].Value);
                     int minor = int.Parse(match.Groups[2].Value);
                     bool legacy = major < 9 || (major == 9 && minor < 51);
-                    string formatDesc = legacy ? "äldre remoteAddress-formatet (IP:port i ett fält)" : "nya remoteAddr-formatet";
+                    string formatDesc = legacy ? "the legacy remoteAddress format (IP:port in a single field)" : "the new remoteAddr format";
                     return new DetectionResult(legacy,
-                        $"Upptäckte Bitvise SSH Server {major}.{minor} i \"{Path.GetFileName(file)}\" → använder {formatDesc}.");
+                        $"Detected Bitvise SSH Server {major}.{minor} in \"{Path.GetFileName(file)}\" → using {formatDesc}.");
                 }
             }
             catch (IOException)
@@ -50,7 +50,7 @@ public static class LogFormatDetector
         }
 
         return new DetectionResult(false,
-            "Kunde inte läsa appVersion ur någon loggfils <start>-rad — använder nya remoteAddr-formatet som standard. " +
-            "Välj manuellt i listan om frågan misslyckas.");
+            "Could not read appVersion from any log file's <start> line — defaulting to the new remoteAddr format. " +
+            "Select it manually in the list if the query fails.");
     }
 }

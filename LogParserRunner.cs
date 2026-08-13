@@ -69,7 +69,7 @@ public static class LogParserRunner
                         : new RunResult(item.Label, true, null, new DataTable(), null);
                 }
                 return new RunResult(item.Label, false,
-                    string.IsNullOrWhiteSpace(err) ? $"LogParser avslutades med felkod {process.ExitCode}." : err,
+                    string.IsNullOrWhiteSpace(err) ? $"LogParser exited with error code {process.ExitCode}." : err,
                     null, null);
             }
 
@@ -82,9 +82,9 @@ public static class LogParserRunner
         catch (Win32Exception ex)
         {
             return new RunResult(item.Label, false,
-                $"Kunde inte starta LogParser (\"{exe}\"): {ex.Message}. " +
-                "Kontrollera att Microsoft LogParser är installerat (winget install Microsoft.LogParser) " +
-                "och att sökvägen ovan är korrekt, eller lämna den tom om LogParser.exe finns i PATH.",
+                $"Could not start LogParser (\"{exe}\"): {ex.Message}. " +
+                "Check that Microsoft LogParser is installed (winget install Microsoft.LogParser) " +
+                "and that the path above is correct, or leave it empty if LogParser.exe is on the PATH.",
                 null, null);
         }
     }
