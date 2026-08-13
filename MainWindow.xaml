@@ -1,0 +1,245 @@
+<Window x:Class="BitviseLogViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BitviseLogViewer"
+        mc:Ignorable="d"
+        Title="Bitvise-loggviewer" Height="800" Width="1200">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TabControl Grid.Row="0">
+        <TabItem Header="Loggfrågor">
+        <Grid Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="380"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Vänster panel: mapp, händelsetyper, filter, LogParser, output -->
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+
+                    <GroupBox Header="Loggmapp" Margin="0,0,0,8">
+                        <StackPanel Margin="6">
+                            <TextBlock TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,6">
+                                Peka ut en lokal mapp med Bitvise-loggfiler (*.log). Har du inte
+                                loggarna lokalt: logga in på servern där Bitvise SSH Server körs
+                                och kopiera filerna från "C:\Program Files\Bitvise SSH Server\Logs"
+                                till en lokal mapp.
+                            </TextBlock>
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Content="Bläddra..." Padding="8,2" Margin="6,0,0,0" Click="BrowseLogFolder_Click"/>
+                                <TextBox x:Name="LogFolderTextBox"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Händelsetyper" Margin="0,0,0,8">
+                        <StackPanel Margin="6">
+                            <CheckBox x:Name="LogonsCheckBox" Content="Inloggningar" Margin="0,2"/>
+
+                            <CheckBox x:Name="TransfersCheckBox" Content="Upp-/nedladdningar" Margin="0,2" Checked="TransfersCheckBox_CheckedChanged" Unchecked="TransfersCheckBox_CheckedChanged"/>
+                            <StackPanel Margin="20,0,0,0">
+                                <CheckBox x:Name="UploadOnlyCheckBox" Content="Bara uppladdningar" Margin="0,2" IsEnabled="False"/>
+                                <CheckBox x:Name="DownloadOnlyCheckBox" Content="Bara nedladdningar" Margin="0,2" IsEnabled="False"/>
+                            </StackPanel>
+
+                            <CheckBox x:Name="RemovesCheckBox" Content="Borttagna filer" Margin="0,2"/>
+                            <CheckBox x:Name="SecurityCheckBox" Content="Säkerhet/algoritmer (SSH key exchange + TLS)" Margin="0,2"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Filter (valfria)" Margin="0,0,0,8">
+                        <StackPanel Margin="6">
+                            <TextBlock Text="Virtual account (LIKE, t.ex. erp-* eller del av namn):"/>
+                            <TextBox x:Name="VirtualAccountTextBox" Margin="0,2,0,8"/>
+
+                            <TextBlock Text="Filnamn/sökväg (t.ex. *.docx):"/>
+                            <TextBox x:Name="FilePatternTextBox" Margin="0,2,0,8"/>
+
+                            <TextBlock Text="Fjärr-IP:"/>
+                            <TextBox x:Name="RemoteIpTextBox" Margin="0,2,0,8"/>
+
+                            <TextBlock Text="Datum &amp; tid från:"/>
+                            <DockPanel Margin="0,2,0,8">
+                                <TextBox x:Name="TimeFromTextBox" DockPanel.Dock="Right" Width="70" Margin="6,0,0,0" ToolTip="Klockslag HH:mm (valfritt)"/>
+                                <DatePicker x:Name="DateFromPicker"/>
+                            </DockPanel>
+
+                            <TextBlock Text="Datum &amp; tid till:"/>
+                            <DockPanel Margin="0,2,0,8">
+                                <TextBox x:Name="TimeToTextBox" DockPanel.Dock="Right" Width="70" Margin="6,0,0,0" ToolTip="Klockslag HH:mm (valfritt)"/>
+                                <DatePicker x:Name="DateToPicker"/>
+                            </DockPanel>
+
+                            <TextBlock Text="Serverversion (remoteAddr vs. remoteAddress):" Margin="0,4,0,0"/>
+                            <ComboBox x:Name="RemoteAddressFormatComboBox" Margin="0,2,0,0" SelectedIndex="0">
+                                <ComboBoxItem Content="Auto-detektera från loggfilen (rekommenderas)"/>
+                                <ComboBoxItem Content="Ny (remoteAddr, Bitvise ≥ 9.51)"/>
+                                <ComboBoxItem Content="Äldre (remoteAddress, Bitvise &lt; 9.51)"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="LogParser" Margin="0,0,0,8">
+                        <StackPanel Margin="6">
+                            <TextBlock TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,6">
+                                Kräver Microsoft LogParser (winget install Microsoft.LogParser).
+                                Lämna fältet tomt om LogParser.exe finns i PATH.
+                            </TextBlock>
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Content="Bläddra..." Padding="8,2" Margin="6,0,0,0" Click="BrowseLogParserExe_Click"/>
+                                <TextBox x:Name="LogParserPathTextBox"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Output" Margin="0,0,0,8">
+                        <StackPanel Margin="6">
+                            <RadioButton x:Name="OutputScreenRadio" Content="Skärm (visa i tabellen nedan)" IsChecked="True" GroupName="Output" Margin="0,2" Checked="OutputMode_Changed"/>
+                            <RadioButton x:Name="OutputFileRadio" Content="Fil (låt LogParser skriva CSV)" GroupName="Output" Margin="0,2" Checked="OutputMode_Changed"/>
+                            <DockPanel Margin="0,6,0,0">
+                                <Button DockPanel.Dock="Right" Content="Bläddra..." Padding="8,2" Margin="6,0,0,0" Click="BrowseOutputFile_Click" x:Name="BrowseOutputButton" IsEnabled="False"/>
+                                <TextBox x:Name="OutputFileTextBox" IsEnabled="False"/>
+                            </DockPanel>
+                            <TextBlock TextWrapping="Wrap" Foreground="Gray" Margin="0,4,0,0" FontStyle="Italic">
+                                Vid flera valda händelsetyper skapas en fil per kategori (suffix läggs till filnamnet).
+                            </TextBlock>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Button x:Name="BuildQueryButton" Content="Bygg fråga" Padding="10,4" Margin="0,0,8,0" Click="BuildQueryButton_Click"/>
+                        <Button x:Name="RunButton" Content="Kör" Padding="10,4" Margin="0,0,8,0" Click="RunButton_Click"/>
+                        <Button x:Name="CopyQueryButton" Content="Kopiera fråga" Padding="10,4" Click="CopyQueryButton_Click"/>
+                    </StackPanel>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Höger panel: genererad fråga (redigerbar) + resultat -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="180"/>
+                    <RowDefinition Height="6"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <GroupBox Grid.Row="0" Header="Genererad LogParser-fråga (redigerbar – finjustera vid behov innan du kör)">
+                    <TextBox x:Name="QueryTextBox" AcceptsReturn="True" TextWrapping="NoWrap"
+                             FontFamily="Consolas" VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Auto" Margin="4"/>
+                </GroupBox>
+
+                <GroupBox Grid.Row="2" Header="Resultat">
+                    <DataGrid x:Name="ResultsDataGrid" AutoGenerateColumns="True" IsReadOnly="True"
+                              Margin="4" CanUserAddRows="False"/>
+                </GroupBox>
+            </Grid>
+        </Grid>
+        </TabItem>
+
+        <TabItem Header="Kontostatistik (Stats)">
+        <Grid Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="380"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Vänster panel: Stats-mapp, filter, LogParser, output -->
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+
+                    <GroupBox Header="Stats-mapp" Margin="0,0,0,8">
+                        <StackPanel Margin="6">
+                            <TextBlock TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,6">
+                                Peka ut en lokal mapp med Bitvise-statistikfiler (*.xml), en fil
+                                per konto/grupp. Ligger i "C:\Program Files\Bitvise SSH
+                                Server\Stats" på servern — kopiera lokalt på samma sätt som
+                                loggfilerna.
+                            </TextBlock>
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Content="Bläddra..." Padding="8,2" Margin="6,0,0,0" Click="BrowseStatsFolder_Click"/>
+                                <TextBox x:Name="StatsFolderTextBox"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Filter (valfria)" Margin="0,0,0,8">
+                        <StackPanel Margin="6">
+                            <TextBlock Text="Konto (LIKE, t.ex. erp-* eller del av namn):"/>
+                            <TextBox x:Name="StatsAccountTextBox" Margin="0,2,0,8"/>
+
+                            <CheckBox x:Name="StatsIncludeGroupsCheckBox" Content="Inkludera grupper och servertotal (inte bara enskilda konton)" Margin="0,2"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="LogParser" Margin="0,0,0,8">
+                        <StackPanel Margin="6">
+                            <TextBlock TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,6">
+                                Kräver Microsoft LogParser. Lämna tomt om LogParser.exe finns i PATH.
+                            </TextBlock>
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Content="Bläddra..." Padding="8,2" Margin="6,0,0,0" Click="BrowseStatsLogParserExe_Click"/>
+                                <TextBox x:Name="StatsLogParserPathTextBox"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Output" Margin="0,0,0,8">
+                        <StackPanel Margin="6">
+                            <RadioButton x:Name="StatsOutputScreenRadio" Content="Skärm (visa i tabellen nedan)" IsChecked="True" GroupName="StatsOutput" Margin="0,2" Checked="StatsOutputMode_Changed"/>
+                            <RadioButton x:Name="StatsOutputFileRadio" Content="Fil (låt LogParser skriva CSV)" GroupName="StatsOutput" Margin="0,2" Checked="StatsOutputMode_Changed"/>
+                            <DockPanel Margin="0,6,0,0">
+                                <Button DockPanel.Dock="Right" Content="Bläddra..." Padding="8,2" Margin="6,0,0,0" Click="BrowseStatsOutputFile_Click" x:Name="StatsBrowseOutputButton" IsEnabled="False"/>
+                                <TextBox x:Name="StatsOutputFileTextBox" IsEnabled="False"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Button x:Name="StatsBuildQueryButton" Content="Bygg fråga" Padding="10,4" Margin="0,0,8,0" Click="StatsBuildQueryButton_Click"/>
+                        <Button x:Name="StatsRunButton" Content="Kör" Padding="10,4" Margin="0,0,8,0" Click="StatsRunButton_Click"/>
+                        <Button x:Name="StatsCopyQueryButton" Content="Kopiera fråga" Padding="10,4" Click="StatsCopyQueryButton_Click"/>
+                    </StackPanel>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Höger panel: genererad fråga (redigerbar) + resultat -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="120"/>
+                    <RowDefinition Height="6"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <GroupBox Grid.Row="0" Header="Genererad LogParser-fråga (redigerbar)">
+                    <TextBox x:Name="StatsQueryTextBox" AcceptsReturn="True" TextWrapping="NoWrap"
+                             FontFamily="Consolas" VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Auto" Margin="4"/>
+                </GroupBox>
+
+                <GroupBox Grid.Row="2" Header="Resultat (kontoöversikt, senast inloggad överst)">
+                    <DataGrid x:Name="StatsResultsDataGrid" AutoGenerateColumns="True" IsReadOnly="True"
+                              Margin="4" CanUserAddRows="False"/>
+                </GroupBox>
+            </Grid>
+        </Grid>
+        </TabItem>
+        </TabControl>
+
+        <StatusBar Grid.Row="1" Margin="0,8,0,0">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusTextBlock" Text="Redo."/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
