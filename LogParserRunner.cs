@@ -60,9 +60,13 @@ public static class LogParserRunner
                 string err = stderrTask.Result.Trim();
                 if (err.Contains("unknown field", StringComparison.OrdinalIgnoreCase))
                 {
-                    err = "Inga händelser av den här typen hittades alls i de valda loggfilerna " +
-                          "(LogParser kräver att fältet förekommer minst en gång för att kunna läsa det). " +
-                          $"Originalfel: {err}";
+                    // Fältet förekommer inte alls i de valda filerna (t.ex. en TLS/FTPS-fråga mot
+                    // en loggmapp som bara innehåller SFTP-trafik) — LogParser kräver att ett
+                    // fält förekommer minst en gång för att kunna läsa det. Det här är i praktiken
+                    // "0 träffar", inte ett fel, så det behandlas som ett lyckat, tomt resultat.
+                    return outputToFile
+                        ? new RunResult(item.Label, true, null, null, null)
+                        : new RunResult(item.Label, true, null, new DataTable(), null);
                 }
                 return new RunResult(item.Label, false,
                     string.IsNullOrWhiteSpace(err) ? $"LogParser avslutades med felkod {process.ExitCode}." : err,

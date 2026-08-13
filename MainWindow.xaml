@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BitviseLogViewer"
         mc:Ignorable="d"
-        Title="Bitvise-loggviewer" Height="800" Width="1200">
+        Title="Bitvise-loggviewer" Height="800" Width="1200" Icon="app.ico">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
