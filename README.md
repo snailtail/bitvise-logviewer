@@ -101,22 +101,4 @@ Konkret exempel — Stats-fliken (kontoöversikt), verifierat mot skarpa Stats-f
 LogParser.exe -q -i:XML -fNames:XPath -fMode:Tree -o:CSV "SELECT DISTINCT /stats/@type AS Typ, /stats/@account AS Konto, /stats/info/@lastLogin AS SenasteInloggning, /stats/total/data/@loginCount AS AntalInloggningar, /stats/total/data/@bytesReceived AS BytesMottagna, /stats/total/data/@bytesSent AS BytesSkickade FROM 'C:\Stats\*.xml' WHERE Typ = 'VirtAccount' ORDER BY SenasteInloggning DESC"
 ```
 
-## Status
 
-Verifierad mot skarpa Bitvise-loggar (Bitvise SSH Server 9.47, ~1,1 GB / 106 loggfiler):
-inloggningar, upp-/nedladdningar, borttagna filer och SSH-algoritmer ger korrekta resultat,
-inklusive full mappsökning med `FROM '<mapp>\*.log'`. Detta avslöjade och ledde till en fix för
-att äldre serverversioner (< 9.51) saknar `remoteAddr`-attributet helt (se
-`LogFormatDetector.cs`) — appen läser nu av versionen automatiskt istället för att kräva att
-användaren vet sin Bitvise-version.
-
-Stats-fliken (kontoöversikt) är också verifierad mot skarpa Stats-filer (56 konto-/grupp-filer).
-Två saker hittades och fixades under den verifieringen: `-rootXPath:/log/event` fick inte
-återanvändas för Stats-frågor (annat XML-rotelement), och `SELECT` måste vara `SELECT DISTINCT`
-för att inte få tiotusentals dubblettrader när flera Stats-XML-filer läses samtidigt — se
-avsnittet ["Köra LogParser manuellt"](#köra-logparser-manuellt-utan-appen) ovan för detaljer.
-
-**Filoutput-läget** är nu verifierat mot skarpa loggar och Stats-filer (både loggfliken och
-Stats-fliken). Första implementationen antog en `-o:CSV:sökväg`-flagga som inte finns —
-LogParser svarade `Unknown output format`. Rätt syntax är en `INTO 'sökväg'`-sats inbakad i
-SQL:en (se `LogParserRunner.InsertIntoClause`), vilket är fixat och testat.
