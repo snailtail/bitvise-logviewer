@@ -17,7 +17,7 @@ public static class QueryBuilder
             string sql = $"SELECT /event/@time AS Time, /event/conn/@windowsAccount AS WinAccount, " +
                          $"/event/conn/@virtualAccount AS VirtAccount, {remoteAddr} AS RemoteAddress " +
                          $"FROM {from} WHERE {string.Join(" AND ", where)}";
-            items.Add(new QueryItem("Inloggningar", "I_LOGON_AUTH_COMPLETED", sql));
+            items.Add(new QueryItem("Logons", "I_LOGON_AUTH_COMPLETED", sql));
         }
 
         if (o.IncludeTransfers)
@@ -31,7 +31,7 @@ public static class QueryBuilder
                          $"/event/sfs/parameters/@path AS Path, /event/sfs/parameters/@bytesWritten AS BytesWritten, " +
                          $"/event/sfs/parameters/@bytesRead AS BytesRead " +
                          $"FROM {from} WHERE {string.Join(" AND ", where)}";
-            items.Add(new QueryItem("Upp-/nedladdningar", "I_SFS_TRANSFER_FILE", sql));
+            items.Add(new QueryItem("Uploads/downloads", "I_SFS_TRANSFER_FILE", sql));
         }
 
         if (o.IncludeRemoves)
@@ -42,7 +42,7 @@ public static class QueryBuilder
                          $"/event/conn/@virtualAccount AS VirtAccount, {remoteAddr} AS RemoteAddress, " +
                          $"/event/sfs/parameters/@path AS Path " +
                          $"FROM {from} WHERE {string.Join(" AND ", where)}";
-            items.Add(new QueryItem("Borttagna filer", "I_SFS_REMOVE_FILE", sql));
+            items.Add(new QueryItem("Deleted files", "I_SFS_REMOVE_FILE", sql));
         }
 
         if (o.IncludeSecurity)
@@ -53,7 +53,7 @@ public static class QueryBuilder
                           $"/event/parameters/@kexAlg AS KexAlg, /event/parameters/@hostKeyAlg AS HostKeyAlg, " +
                           $"/event/parameters/@cipherAlgIn AS CipherAlgIn, /event/parameters/@cipherAlgOut AS CipherAlgOut " +
                           $"FROM {from} WHERE {string.Join(" AND ", where1)}";
-            items.Add(new QueryItem("Algoritmer (SSH key exchange)", "I_SSH_KEY_EXCHANGE_ALGORITHMS", sql1));
+            items.Add(new QueryItem("Algorithms (SSH key exchange)", "I_SSH_KEY_EXCHANGE_ALGORITHMS", sql1));
 
             var where2 = new List<string> { "/event/@name = 'I_FTP_CONTROL_TLS_NEGOTIATED'" };
             AddCommonFilters(where2, o, hasVirtAccount: false, hasRemoteAddress: true, hasPath: false);
@@ -88,9 +88,9 @@ public static class QueryBuilder
             ? "EXTRACT_PREFIX(/event/conn/@remoteAddress, 0, ':')"
             : "/event/conn/@remoteAddr";
 
-    // Konverterar användarvänliga mönster ("*.docx", "kontonamn") till LogParsers SQL LIKE-syntax.
-    // Utan explicit '%' antas ett "innehåller"-mönster, för att slippa kräva SQL LIKE-syntax av användaren.
-    // Internal (inte private) eftersom StatsQueryBuilder återanvänder samma logik.
+    // Converts user-friendly patterns ("*.docx", "accountname") to LogParser's SQL LIKE syntax.
+    // Without an explicit '%', a "contains" pattern is assumed, to avoid requiring users to know
+    // SQL LIKE syntax. Internal (not private) because StatsQueryBuilder reuses the same logic.
     internal static string ToSqlLikePattern(string input)
     {
         var pattern = input.Trim().Replace('*', '%');

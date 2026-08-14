@@ -2,14 +2,14 @@ using System.Data;
 
 namespace BitviseLogViewer;
 
-// Slår ihop resultattabeller från flera kategorier (en LogParser-körning per händelsetyp)
-// till en gemensam tabell för visning, med en "Kategori"-kolumn och unionen av alla kolumner.
+// Merges result tables from multiple categories (one LogParser run per event type)
+// into a single table for display, with a "Category" column and the union of all columns.
 public static class DataTableMerger
 {
     public static DataTable Merge(List<(string Label, DataTable Table)> tables)
     {
         var result = new DataTable();
-        result.Columns.Add("Kategori");
+        result.Columns.Add("Category");
 
         var columnOrder = new List<string>();
         foreach (var (_, t) in tables)
@@ -25,7 +25,7 @@ public static class DataTableMerger
             foreach (DataRow srcRow in t.Rows)
             {
                 var row = result.NewRow();
-                row["Kategori"] = label;
+                row["Category"] = label;
                 foreach (var colName in columnOrder)
                     row[colName] = t.Columns.Contains(colName) ? srcRow[colName] : DBNull.Value;
                 result.Rows.Add(row);

@@ -3,10 +3,11 @@ using System.Text.RegularExpressions;
 
 namespace BitviseLogViewer;
 
-// Bitvise SSH Server bytte från ett kombinerat "remoteAddress" (IP:port) till separata
-// "remoteAddr"/"remoteAddrPort" i version 9.51. Att gissa fel på det ger ett rent LogParser-fel
-// (attributet saknas helt i filen, inte bara null), så vi läser hellre appVersion ur loggfilens
-// egen <start .../>-rad än att kräva att användaren känner till sin serverversion.
+// Bitvise SSH Server switched from a combined "remoteAddress" (IP:port) to separate
+// "remoteAddr"/"remoteAddrPort" in version 9.51. Guessing wrong produces an outright LogParser
+// error (the attribute is entirely missing from the file, not just null), so we'd rather read
+// appVersion from the log file's own <start .../> line than require the user to know their
+// server version.
 public static class LogFormatDetector
 {
     public record DetectionResult(bool IsLegacy, string Message);
@@ -14,11 +15,11 @@ public static class LogFormatDetector
     public static DetectionResult Detect(string logFolder)
     {
         if (!Directory.Exists(logFolder))
-            return new DetectionResult(false, "Loggmappen finns inte — använder nya remoteAddr-formatet som standard.");
+            return new DetectionResult(false, "The log folder does not exist — defaulting to the new remoteAddr format.");
 
         var files = Directory.GetFiles(logFolder, "*.log");
         if (files.Length == 0)
-            return new DetectionResult(false, "Inga .log-filer hittades i mappen — använder nya remoteAddr-formatet som standard.");
+            return new DetectionResult(false, "No .log files were found in the folder — defaulting to the new remoteAddr format.");
 
         foreach (var file in files)
         {
@@ -38,19 +39,19 @@ public static class LogFormatDetector
                     int major = int.Parse(match.Groups[1].Value);
                     int minor = int.Parse(match.Groups[2].Value);
                     bool legacy = major < 9 || (major == 9 && minor < 51);
-                    string formatDesc = legacy ? "äldre remoteAddress-formatet (IP:port i ett fält)" : "nya remoteAddr-formatet";
+                    string formatDesc = legacy ? "the legacy remoteAddress format (IP:port in a single field)" : "the new remoteAddr format";
                     return new DetectionResult(legacy,
-                        $"Upptäckte Bitvise SSH Server {major}.{minor} i \"{Path.GetFileName(file)}\" → använder {formatDesc}.");
+                        $"Detected Bitvise SSH Server {major}.{minor} in \"{Path.GetFileName(file)}\" → using {formatDesc}.");
                 }
             }
             catch (IOException)
             {
-                // Filen kan vara låst av den körande servern — prova nästa.
+                // The file may be locked by the running server — try the next one.
             }
         }
 
         return new DetectionResult(false,
-            "Kunde inte läsa appVersion ur någon loggfils <start>-rad — använder nya remoteAddr-formatet som standard. " +
-            "Välj manuellt i listan om frågan misslyckas.");
+            "Could not read appVersion from any log file's <start> line — defaulting to the new remoteAddr format. " +
+            "Select it manually in the list if the query fails.");
     }
 }

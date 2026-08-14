@@ -3,7 +3,7 @@ using System.Text;
 
 namespace BitviseLogViewer;
 
-// Minimal CSV-tolkare för LogParsers -o:CSV-utdata (hanterar citerade fält med kommatecken).
+// Minimal CSV parser for LogParser's -o:CSV output (handles quoted fields containing commas).
 public static class CsvParser
 {
     public static DataTable Parse(string csvText)

@@ -29,7 +29,7 @@ public partial class MainWindow : Window
 
     private void OutputMode_Changed(object sender, RoutedEventArgs e)
     {
-        // Kan triggas av XAML-laddningen innan alla namngivna kontroller är kopplade.
+        // Can be triggered by XAML loading before all named controls are wired up.
         if (OutputFileTextBox == null || BrowseOutputButton == null || OutputFileRadio == null)
             return;
 
@@ -40,7 +40,7 @@ public partial class MainWindow : Window
 
     private void BrowseLogFolder_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Välj mapp med Bitvise-loggfiler" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Select the folder containing Bitvise log files" };
         if (dlg.ShowDialog() == true)
             LogFolderTextBox.Text = dlg.FolderName;
     }
@@ -49,8 +49,8 @@ public partial class MainWindow : Window
     {
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "Välj LogParser.exe",
-            Filter = "LogParser.exe|LogParser.exe|Program (*.exe)|*.exe|Alla filer (*.*)|*.*"
+            Title = "Select LogParser.exe",
+            Filter = "LogParser.exe|LogParser.exe|Programs (*.exe)|*.exe|All files (*.*)|*.*"
         };
         if (dlg.ShowDialog() == true)
             LogParserPathTextBox.Text = dlg.FileName;
@@ -60,9 +60,9 @@ public partial class MainWindow : Window
     {
         var dlg = new Microsoft.Win32.SaveFileDialog
         {
-            Title = "Spara resultat som",
-            Filter = "CSV-filer (*.csv)|*.csv|Alla filer (*.*)|*.*",
-            FileName = "bitvise-resultat.csv"
+            Title = "Save results as",
+            Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*",
+            FileName = "bitvise-results.csv"
         };
         if (dlg.ShowDialog() == true)
             OutputFileTextBox.Text = dlg.FileName;
@@ -72,17 +72,17 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrWhiteSpace(QueryTextBox.Text))
         {
-            StatusTextBlock.Text = "Ingen fråga att kopiera – klicka Bygg fråga först.";
+            StatusTextBlock.Text = "No query to copy — click Build query first.";
             return;
         }
         try
         {
             Clipboard.SetText(QueryTextBox.Text);
-            StatusTextBlock.Text = "Fråga kopierad till urklipp.";
+            StatusTextBlock.Text = "Query copied to the clipboard.";
         }
         catch (Exception ex)
         {
-            StatusTextBlock.Text = $"Kunde inte kopiera: {ex.Message}";
+            StatusTextBlock.Text = $"Could not copy: {ex.Message}";
         }
     }
 
@@ -95,7 +95,7 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrWhiteSpace(LogFolderTextBox.Text))
         {
-            StatusTextBlock.Text = "Ange en loggmapp innan du bygger frågan.";
+            StatusTextBlock.Text = "Enter a log folder before building the query.";
             return false;
         }
 
@@ -123,12 +123,12 @@ public partial class MainWindow : Window
 
         if (items.Count == 0)
         {
-            StatusTextBlock.Text = "Välj minst en händelsetyp innan du bygger frågan.";
+            StatusTextBlock.Text = "Select at least one event type before building the query.";
             return false;
         }
 
         QueryTextBox.Text = FormatQueryText(items);
-        StatusTextBlock.Text = "Fråga byggd. Granska/redigera vid behov och klicka Kör." + detectionNote;
+        StatusTextBlock.Text = "Query built. Review/edit if needed, then click Run." + detectionNote;
         return true;
     }
 
@@ -202,7 +202,7 @@ public partial class MainWindow : Window
         foreach (var c in s)
             sb.Append(char.IsLetterOrDigit(c) ? c : '-');
         var result = sb.ToString().Trim('-');
-        return result.Length == 0 ? "resultat" : result;
+        return result.Length == 0 ? "result" : result;
     }
 
     private async void RunButton_Click(object sender, RoutedEventArgs e)
@@ -216,27 +216,27 @@ public partial class MainWindow : Window
         var items = ParseQueryText(QueryTextBox.Text);
         if (items.Count == 0)
         {
-            StatusTextBlock.Text = "Ingen giltig fråga hittades i frågefältet.";
+            StatusTextBlock.Text = "No valid query was found in the query box.";
             return;
         }
 
         string logFolder = LogFolderTextBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(logFolder))
         {
-            StatusTextBlock.Text = "Ange en loggmapp innan du kör.";
+            StatusTextBlock.Text = "Enter a log folder before running.";
             return;
         }
 
         bool outputToFile = OutputFileRadio.IsChecked == true;
         if (outputToFile && string.IsNullOrWhiteSpace(OutputFileTextBox.Text))
         {
-            StatusTextBlock.Text = "Ange en fil att spara resultatet i, eller välj Skärm som output.";
+            StatusTextBlock.Text = "Enter a file to save the results to, or select Screen as the output.";
             return;
         }
 
         RunButton.IsEnabled = false;
         BuildQueryButton.IsEnabled = false;
-        StatusTextBlock.Text = "Kör mot LogParser...";
+        StatusTextBlock.Text = "Running LogParser...";
 
         try
         {
@@ -281,14 +281,14 @@ public partial class MainWindow : Window
 
                 int rowCount = merged.Rows.Count;
                 StatusTextBlock.Text = errors.Count > 0
-                    ? $"Klart med fel. {rowCount} rad(er) visas. Fel: {string.Join(" | ", errors)}"
-                    : $"Klart. {rowCount} rad(er) visas.";
+                    ? $"Finished with errors. {rowCount} row(s) shown. Errors: {string.Join(" | ", errors)}"
+                    : $"Finished. {rowCount} row(s) shown.";
             }
             else
             {
                 StatusTextBlock.Text = errors.Count > 0
-                    ? $"Klart med fel. Skapade filer: {string.Join(", ", createdFiles)}. Fel: {string.Join(" | ", errors)}"
-                    : $"Klart. Skapade filer: {string.Join(", ", createdFiles)}";
+                    ? $"Finished with errors. Files created: {string.Join(", ", createdFiles)}. Errors: {string.Join(" | ", errors)}"
+                    : $"Finished. Files created: {string.Join(", ", createdFiles)}";
             }
         }
         finally
@@ -307,7 +307,7 @@ public partial class MainWindow : Window
         return Path.Combine(dir, $"{name}_{SanitizeForFileName(label)}{ext}");
     }
 
-    // --- Kontostatistik (Stats) ---
+    // --- Account statistics (Stats) ---
 
     private void StatsOutputMode_Changed(object sender, RoutedEventArgs e)
     {
@@ -321,7 +321,7 @@ public partial class MainWindow : Window
 
     private void BrowseStatsFolder_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Välj mapp med Bitvise Stats-filer" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Select the folder containing Bitvise Stats files" };
         if (dlg.ShowDialog() == true)
             StatsFolderTextBox.Text = dlg.FolderName;
     }
@@ -330,8 +330,8 @@ public partial class MainWindow : Window
     {
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "Välj LogParser.exe",
-            Filter = "LogParser.exe|LogParser.exe|Program (*.exe)|*.exe|Alla filer (*.*)|*.*"
+            Title = "Select LogParser.exe",
+            Filter = "LogParser.exe|LogParser.exe|Programs (*.exe)|*.exe|All files (*.*)|*.*"
         };
         if (dlg.ShowDialog() == true)
             StatsLogParserPathTextBox.Text = dlg.FileName;
@@ -341,9 +341,9 @@ public partial class MainWindow : Window
     {
         var dlg = new Microsoft.Win32.SaveFileDialog
         {
-            Title = "Spara resultat som",
-            Filter = "CSV-filer (*.csv)|*.csv|Alla filer (*.*)|*.*",
-            FileName = "bitvise-kontostatistik.csv"
+            Title = "Save results as",
+            Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*",
+            FileName = "bitvise-account-statistics.csv"
         };
         if (dlg.ShowDialog() == true)
             StatsOutputFileTextBox.Text = dlg.FileName;
@@ -353,17 +353,17 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrWhiteSpace(StatsQueryTextBox.Text))
         {
-            StatusTextBlock.Text = "Ingen fråga att kopiera – klicka Bygg fråga först.";
+            StatusTextBlock.Text = "No query to copy — click Build query first.";
             return;
         }
         try
         {
             Clipboard.SetText(StatsQueryTextBox.Text);
-            StatusTextBlock.Text = "Fråga kopierad till urklipp.";
+            StatusTextBlock.Text = "Query copied to the clipboard.";
         }
         catch (Exception ex)
         {
-            StatusTextBlock.Text = $"Kunde inte kopiera: {ex.Message}";
+            StatusTextBlock.Text = $"Could not copy: {ex.Message}";
         }
     }
 
@@ -376,7 +376,7 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrWhiteSpace(StatsFolderTextBox.Text))
         {
-            StatusTextBlock.Text = "Ange en Stats-mapp innan du bygger frågan.";
+            StatusTextBlock.Text = "Enter a Stats folder before building the query.";
             return false;
         }
 
@@ -390,7 +390,7 @@ public partial class MainWindow : Window
         };
 
         StatsQueryTextBox.Text = StatsQueryBuilder.Build(options) + ";";
-        StatusTextBlock.Text = "Fråga byggd. Granska/redigera vid behov och klicka Kör.";
+        StatusTextBlock.Text = "Query built. Review/edit if needed, then click Run.";
         return true;
     }
 
@@ -405,48 +405,48 @@ public partial class MainWindow : Window
         string sql = StatsQueryTextBox.Text.Trim().TrimEnd(';').Trim();
         if (string.IsNullOrWhiteSpace(sql))
         {
-            StatusTextBlock.Text = "Ingen giltig fråga hittades i frågefältet.";
+            StatusTextBlock.Text = "No valid query was found in the query box.";
             return;
         }
 
         string statsFolder = StatsFolderTextBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(statsFolder))
         {
-            StatusTextBlock.Text = "Ange en Stats-mapp innan du kör.";
+            StatusTextBlock.Text = "Enter a Stats folder before running.";
             return;
         }
 
         bool outputToFile = StatsOutputFileRadio.IsChecked == true;
         if (outputToFile && string.IsNullOrWhiteSpace(StatsOutputFileTextBox.Text))
         {
-            StatusTextBlock.Text = "Ange en fil att spara resultatet i, eller välj Skärm som output.";
+            StatusTextBlock.Text = "Enter a file to save the results to, or select Screen as the output.";
             return;
         }
 
         StatsRunButton.IsEnabled = false;
         StatsBuildQueryButton.IsEnabled = false;
-        StatusTextBlock.Text = "Kör mot LogParser...";
+        StatusTextBlock.Text = "Running LogParser...";
 
         try
         {
             string logParserPath = StatsLogParserPathTextBox.Text.Trim();
             string? outputPath = outputToFile ? StatsOutputFileTextBox.Text.Trim() : null;
-            var queryItem = new QueryBuilder.QueryItem("Kontostatistik", "", sql);
+            var queryItem = new QueryBuilder.QueryItem("Account statistics", "", sql);
             var result = await LogParserRunner.RunAsync(logParserPath, queryItem, statsFolder, outputToFile, outputPath, rootXPath: null);
 
             if (!result.Success)
             {
-                StatusTextBlock.Text = $"Fel: {result.ErrorMessage}";
+                StatusTextBlock.Text = $"Error: {result.ErrorMessage}";
             }
             else if (outputToFile)
             {
-                StatusTextBlock.Text = $"Klart. Fil skapad: {result.OutputFilePath}";
+                StatusTextBlock.Text = $"Finished. File created: {result.OutputFilePath}";
             }
             else
             {
                 var table = result.Table ?? new DataTable();
                 StatsResultsDataGrid.ItemsSource = table.DefaultView;
-                StatusTextBlock.Text = $"Klart. {table.Rows.Count} rad(er) visas.";
+                StatusTextBlock.Text = $"Finished. {table.Rows.Count} row(s) shown.";
             }
         }
         finally
