@@ -4,6 +4,23 @@ A GUI tool (WPF/.NET) that helps you interpret Bitvise SSH Server log files with
 Microsoft LogParser syntax by hand. The app builds the right LogParser query from your choices in
 the GUI and runs it as a subprocess — LogParser still does the actual XML parsing.
 
+## Scope: virtual accounts only
+
+The GUI's filtering is built around Bitvise SSH Server's **virtual accounts**, not Windows/domain
+accounts or other account types the server may authenticate:
+
+- **Log queries tab**: the only account filter is `VirtAccount`
+  (`/event/conn/@virtualAccount`). `WinAccount` (`/event/conn/@windowsAccount`) is included as a
+  column in the result, but there's no GUI filter for it.
+- **Account statistics tab**: unless you tick "Include groups and server total", the query is
+  hardcoded to `Type = 'VirtAccount'`. Rows with any other `Type` — e.g. Windows-authenticated
+  accounts, if Bitvise logs those under a different type in the Stats files — won't show up,
+  regardless of what you filter on.
+
+If you need to filter or analyze Windows/domain accounts, use **Copy query** (see below) and edit
+the `WHERE` clause by hand, e.g. filter on `WinAccount` instead of `VirtAccount`, or change/drop the
+`Type = 'VirtAccount'` condition on the Stats tab.
+
 ## Requirements
 
 - .NET 10 SDK (or later) to build.
