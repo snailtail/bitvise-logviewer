@@ -33,12 +33,12 @@ public static class LogParserRunner
         psi.ArgumentList.Add("-i:XML");
         psi.ArgumentList.Add("-fNames:XPath");
         psi.ArgumentList.Add("-fMode:Tree");
-        // Loggfilernas upprepade <event>-element kräver -rootXPath, men Stats-filernas enda
-        // <stats>-rot gör det överflödigt (och ger "no attributes nor values" om det ändå sätts).
+        // Log files' repeated <event> elements require -rootXPath, but Stats files' single
+        // <stats> root makes it redundant (and produces "no attributes nor values" if set anyway).
         if (!string.IsNullOrEmpty(rootXPath))
             psi.ArgumentList.Add($"-rootXPath:{rootXPath}");
-        // -o:<format> väljer bara formatet. Filutdata styrs av en INTO-sats i själva SQL:en
-        // (verifierat mot LogParser -h -o:CSV) — det finns ingen "-o:CSV:fil"-flagga.
+        // -o:<format> only selects the format. File output is controlled by an INTO clause in the
+        // SQL itself (verified against LogParser -h -o:CSV) — there is no "-o:CSV:file" flag.
         psi.ArgumentList.Add("-o:CSV");
         string sql = outputToFile && !string.IsNullOrWhiteSpace(outputFilePath)
             ? InsertIntoClause(item.Sql, outputFilePath)
@@ -48,7 +48,7 @@ public static class LogParserRunner
         try
         {
             using var process = Process.Start(psi)
-                ?? throw new InvalidOperationException("Process.Start returnerade null.");
+                ?? throw new InvalidOperationException("Process.Start returned null.");
 
             Task<string> stdoutTask = process.StandardOutput.ReadToEndAsync();
             Task<string> stderrTask = process.StandardError.ReadToEndAsync();
@@ -60,10 +60,10 @@ public static class LogParserRunner
                 string err = stderrTask.Result.Trim();
                 if (err.Contains("unknown field", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Fältet förekommer inte alls i de valda filerna (t.ex. en TLS/FTPS-fråga mot
-                    // en loggmapp som bara innehåller SFTP-trafik) — LogParser kräver att ett
-                    // fält förekommer minst en gång för att kunna läsa det. Det här är i praktiken
-                    // "0 träffar", inte ett fel, så det behandlas som ett lyckat, tomt resultat.
+                    // The field doesn't occur at all in the selected files (e.g. a TLS/FTPS query against
+                    // a log folder that only contains SFTP traffic) — LogParser requires a field to occur
+                    // at least once to be able to read it. This is effectively "0 matches", not an error,
+                    // so it's treated as a successful, empty result.
                     return outputToFile
                         ? new RunResult(item.Label, true, null, null, null)
                         : new RunResult(item.Label, true, null, new DataTable(), null);

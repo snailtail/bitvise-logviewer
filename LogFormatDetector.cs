@@ -3,10 +3,11 @@ using System.Text.RegularExpressions;
 
 namespace BitviseLogViewer;
 
-// Bitvise SSH Server bytte från ett kombinerat "remoteAddress" (IP:port) till separata
-// "remoteAddr"/"remoteAddrPort" i version 9.51. Att gissa fel på det ger ett rent LogParser-fel
-// (attributet saknas helt i filen, inte bara null), så vi läser hellre appVersion ur loggfilens
-// egen <start .../>-rad än att kräva att användaren känner till sin serverversion.
+// Bitvise SSH Server switched from a combined "remoteAddress" (IP:port) to separate
+// "remoteAddr"/"remoteAddrPort" in version 9.51. Guessing wrong produces an outright LogParser
+// error (the attribute is entirely missing from the file, not just null), so we'd rather read
+// appVersion from the log file's own <start .../> line than require the user to know their
+// server version.
 public static class LogFormatDetector
 {
     public record DetectionResult(bool IsLegacy, string Message);
@@ -45,7 +46,7 @@ public static class LogFormatDetector
             }
             catch (IOException)
             {
-                // Filen kan vara låst av den körande servern — prova nästa.
+                // The file may be locked by the running server — try the next one.
             }
         }
 

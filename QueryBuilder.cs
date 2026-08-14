@@ -88,9 +88,9 @@ public static class QueryBuilder
             ? "EXTRACT_PREFIX(/event/conn/@remoteAddress, 0, ':')"
             : "/event/conn/@remoteAddr";
 
-    // Konverterar användarvänliga mönster ("*.docx", "kontonamn") till LogParsers SQL LIKE-syntax.
-    // Utan explicit '%' antas ett "innehåller"-mönster, för att slippa kräva SQL LIKE-syntax av användaren.
-    // Internal (inte private) eftersom StatsQueryBuilder återanvänder samma logik.
+    // Converts user-friendly patterns ("*.docx", "accountname") to LogParser's SQL LIKE syntax.
+    // Without an explicit '%', a "contains" pattern is assumed, to avoid requiring users to know
+    // SQL LIKE syntax. Internal (not private) because StatsQueryBuilder reuses the same logic.
     internal static string ToSqlLikePattern(string input)
     {
         var pattern = input.Trim().Replace('*', '%');

@@ -2,12 +2,12 @@ namespace BitviseLogViewer;
 
 public static class StatsQueryBuilder
 {
-    // Varje *.xml i Stats-mappen har en enda <stats>-rot (ett konto/grupp/servertotal per fil),
-    // till skillnad från loggfilernas upprepade <event>-element. LogParser radar ändå ut samma
-    // rad flera gånger per fil när flera XML-filer läses samtidigt i Tree-läge (bekräftat mot
-    // skarpa Stats-filer: utan DISTINCT gav en fil med lång dagshistorik tiotusentals dubbletter
-    // av samma rad) — därför måste SELECT DISTINCT alltid vara med, precis som i Bitvise egen
-    // dokumentationsexempel för Stats-filer.
+    // Each *.xml in the Stats folder has a single <stats> root (one account/group/server total
+    // per file), unlike log files' repeated <event> elements. LogParser still emits the same row
+    // multiple times per file when several XML files are read together in Tree mode (confirmed
+    // against real Stats files: without DISTINCT, a file with a long day history produced tens of
+    // thousands of duplicates of the same row) — so SELECT DISTINCT must always be included, just
+    // like in Bitvise's own documentation examples for Stats files.
     public static string Build(StatsQueryOptions o)
     {
         var where = new List<string>();
